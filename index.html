@@ -23,12 +23,14 @@
         const statusEl = document.getElementById('status');
 
         try {
-            const supabase = supabase.createClient(_SUPABASE_URL, _SUPABASE_ANON_KEY);
+            // Исправлено: назвали переменную supabaseClient, чтобы не конфликтовать 
+            // с глобальным объектом supabase из библиотеки
+            const supabaseClient = supabase.createClient(_SUPABASE_URL, _SUPABASE_ANON_KEY);
             statusEl.innerHTML = '<span class="success">Supabase клиент успешно инициализирован! 🚀</span>';
             
             // Пример запроса к базе данных:
             // async function testDb() {
-            //   const { data, error } = await supabase.from('test_table').select('*').limit(1);
+            //   const { data, error } = await supabaseClient.from('test_table').select('*').limit(1);
             //   if (error) console.error(error);
             //   else console.log('Data:', data);
             // }
