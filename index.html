@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Vercel & Supabase App</title>
+    <!-- Подключаем Supabase через CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: sans-serif; padding: 2rem; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Проверка подключения к Supabase</h1>
+    <div id="status">Ожидание настройки ключей...</div>
+
+    <script>
+        // ВАЖНО: Замените эти значения на ваши из панели управления Supabase
+        const _SUPABASE_URL = 'ВАШ_SUPABASE_URL_ЗДЕСЬ';
+        const _SUPABASE_ANON_KEY = 'ВАШ_SUPABASE_ANON_KEY_ЗДЕСЬ';
+
+        const statusEl = document.getElementById('status');
+
+        if (_SUPABASE_URL === 'ВАШ_SUPABASE_URL_ЗДЕСЬ') {
+            statusEl.innerHTML = '<span class="error">Ошибка: Укажите ваши URL и KEY в файле index.html (строки 18-19)</span>';
+        } else {
+            try {
+                const supabase = supabase.createClient(_SUPABASE_URL, _SUPABASE_ANON_KEY);
+                statusEl.innerHTML = '<span class="success">Supabase клиент успешно инициализирован! 🚀</span>';
+                
+                // Пример запроса к базе данных:
+                // async function testDb() {
+                //   const { data, error } = await supabase.from('test_table').select('*').limit(1);
+                //   if (error) console.error(error);
+                //   else console.log('Data:', data);
+                // }
+                // testDb();
+
+            } catch (err) {
+                statusEl.innerHTML = '<span class="error">Ошибка инициализации: ' + err.message + '</span>';
+            }
+        }
+    </script>
+</body>
+</html>
