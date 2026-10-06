@@ -14,33 +14,28 @@
 </head>
 <body>
     <h1>Проверка подключения к Supabase</h1>
-    <div id="status">Ожидание настройки ключей...</div>
+    <div id="status">Подключение...</div>
 
     <script>
-        // ВАЖНО: Замените эти значения на ваши из панели управления Supabase
         const _SUPABASE_URL = 'https://btgmverrebmhwyhzwtjc.supabase.co/';
-        const _SUPABASE_ANON_KEY = 'sb_publishable_v4UBLrq8e2ItFgNWhCtLsg_dLgHFc0n;
+        const _SUPABASE_ANON_KEY = 'sb_publishable_v4UBLrq8e2ItFgNWhCtLsg_dLgHFc0n';
 
         const statusEl = document.getElementById('status');
 
-        if (_SUPABASE_URL === 'https://btgmverrebmhwyhzwtjc.supabase.co/') {
-            statusEl.innerHTML = '<span class="error">Ошибка: Укажите ваши URL и KEY в файле index.html (строки 18-19)</span>';
-        } else {
-            try {
-                const supabase = supabase.createClient(_SUPABASE_URL, _SUPABASE_ANON_KEY);
-                statusEl.innerHTML = '<span class="success">Supabase клиент успешно инициализирован! 🚀</span>';
-                
-                // Пример запроса к базе данных:
-                // async function testDb() {
-                //   const { data, error } = await supabase.from('test_table').select('*').limit(1);
-                //   if (error) console.error(error);
-                //   else console.log('Data:', data);
-                // }
-                // testDb();
+        try {
+            const supabase = supabase.createClient(_SUPABASE_URL, _SUPABASE_ANON_KEY);
+            statusEl.innerHTML = '<span class="success">Supabase клиент успешно инициализирован! 🚀</span>';
+            
+            // Пример запроса к базе данных:
+            // async function testDb() {
+            //   const { data, error } = await supabase.from('test_table').select('*').limit(1);
+            //   if (error) console.error(error);
+            //   else console.log('Data:', data);
+            // }
+            // testDb();
 
-            } catch (err) {
-                statusEl.innerHTML = '<span class="error">Ошибка инициализации: ' + err.message + '</span>';
-            }
+        } catch (err) {
+            statusEl.innerHTML = '<span class="error">Ошибка инициализации: ' + err.message + '</span>';
         }
     </script>
 </body>
