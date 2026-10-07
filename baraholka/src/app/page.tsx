@@ -1,55 +1,43 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
-// Выдуманные объявления
-const DUMMY_ADS = [
-  {
-    id: 1,
-    title: "Учебник по Высшей математике",
-    price: 3500,
-    category: "Учеба",
-    telegram: "@math_genius",
-  },
-  {
-    id: 2,
-    title: "Беспроводные наушники Sony",
-    price: 15000,
-    category: "Электроника",
-    telegram: "@music_lover22",
-  },
-  {
-    id: 3,
-    title: "Чертежный тубус (почти новый)",
-    price: 2000,
-    category: "Учеба",
-    telegram: "@arch_student",
-  },
-  {
-    id: 4,
-    title: "Велосипед спортивный",
-    price: 45000,
-    category: "Спорт",
-    telegram: "@speedy_gonzales",
-  },
-  {
-    id: 5,
-    title: "Ноутбук Lenovo ThinkPad",
-    price: 120000,
-    category: "Электроника",
-    telegram: "@coder_bro",
-  },
-  {
-    id: 6,
-    title: "Сборник задач по физике",
-    price: 1000,
-    category: "Учеба",
-    telegram: "@newton_apple",
-  },
-];
+// Тип данных из таблицы Supabase
+type Listing = {
+  id: number;
+  title: string;
+  price: number;
+  category: string;
+  contact: string;
+  is_sold: boolean;
+  created_at: string;
+};
 
 export default function Home() {
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    async function fetchListings() {
+      const { data, error } = await supabase
+        .from("listings")
+        .select("*")
+        .eq("is_sold", false)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        setError(error.message);
+      } else {
+        setListings(data || []);
+      }
+      setLoading(false);
+    }
+
+    fetchListings();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 font-sans pb-10">
@@ -68,51 +56,73 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Сетка карточек */}
+      {/* Контент */}
       <main className="max-w-6xl mx-auto px-4 mt-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {DUMMY_ADS.map((ad) => (
-            <div
-              key={ad.id}
-              className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200 flex flex-col"
-            >
-              <div className="mb-2">
-                <span className="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-md mb-2">
-                  {ad.category}
-                </span>
-                <h2 className="text-lg font-semibold text-gray-800 leading-tight">
-                  {ad.title}
-                </h2>
-              </div>
-              <p className="text-xl font-bold text-green-600 my-2">
-                {ad.price.toLocaleString("ru-RU")} ₸
-              </p>
-              <div className="mt-auto pt-4 border-t border-gray-100">
-                <p className="text-sm text-gray-500 flex items-center gap-1">
-                  Telegram: 
-                  <a
-                    href={`https://t.me/${ad.telegram.replace("@", "")}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-blue-500 hover:underline font-medium"
-                  >
-                    {ad.telegram}
-                  </a>
+        {/* Состояние загрузки */}
+        {loading && (
+          <div className="flex justify-center items-center py-20">
+            <div className="text-gray-400 text-lg animate-pulse">Загрузка объявлений...</div>
+          </div>
+        )}
+
+        {/* Ошибка */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <strong>Ошибка подключения к базе данных:</strong> {error}
+          </div>
+        )}
+
+        {/* Пустой список */}
+        {!loading && !error && listings.length === 0 && (
+          <div className="text-center py-20 text-gray-400">
+            Объявлений пока нет. Будьте первым!
+          </div>
+        )}
+
+        {/* Сетка карточек */}
+        {!loading && !error && listings.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {listings.map((ad) => (
+              <div
+                key={ad.id}
+                className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200 flex flex-col"
+              >
+                <div className="mb-2">
+                  <span className="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-md mb-2">
+                    {ad.category}
+                  </span>
+                  <h2 className="text-lg font-semibold text-gray-800 leading-tight">
+                    {ad.title}
+                  </h2>
+                </div>
+                <p className="text-xl font-bold text-green-600 my-2">
+                  {ad.price.toLocaleString("ru-RU")} ₸
                 </p>
+                <div className="mt-auto pt-4 border-t border-gray-100">
+                  <p className="text-sm text-gray-500">
+                    Telegram:{" "}
+                    <a
+                      href={`https://t.me/${ad.contact.replace("@", "")}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-blue-500 hover:underline font-medium"
+                    >
+                      {ad.contact}
+                    </a>
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </main>
 
-      {/* Модальное окно (Форма добавления) */}
+      {/* Модальное окно */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-              <h3 className="text-xl font-bold text-gray-800">
-                Новое объявление
-              </h3>
+              <h3 className="text-xl font-bold text-gray-800">Новое объявление</h3>
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
@@ -120,12 +130,11 @@ export default function Home() {
                 &times;
               </button>
             </div>
-            
+
             <div className="p-6">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  // Пока просто закрываем форму, без сохранения
                   setIsModalOpen(false);
                 }}
                 className="flex flex-col gap-4"
